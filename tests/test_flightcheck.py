@@ -47,6 +47,14 @@ class ScaffoldTest(unittest.TestCase):
             self.assertEqual(lint_source(main_c), [],
                              "the scaffolded app must pass flightcheck check with no findings")
 
+    def test_scaffold_with_path_uses_bare_binary_name(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = scaffold(tmp, "apps/heartbeat_server")
+            self.assertEqual(target, os.path.join(tmp, "apps/heartbeat_server"))
+            makefile = open(os.path.join(target, "Makefile")).read()
+            self.assertIn("TARGET = heartbeat_server", makefile)
+            self.assertNotIn("TARGET = apps/", makefile)
+
 
 if __name__ == "__main__":
     unittest.main()

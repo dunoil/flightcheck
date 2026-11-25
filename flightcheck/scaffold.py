@@ -103,11 +103,16 @@ and boot this binary, or copy it to any QNX 8.0 target and run it directly.
 def scaffold(base_dir, name):
     target = os.path.join(base_dir, name)
     os.makedirs(target, exist_ok=True)
+    # The Makefile TARGET must be a bare binary name, never a path. A reader
+    # passing a path such as "apps/heartbeat" used to get TARGET = apps/heartbeat
+    # and a failing make. The project directory keeps the full path; the
+    # generated files use only the last component.
+    app_name = os.path.basename(name.rstrip("/")) or name
     files = {
-        "main.c": MAIN_C.format(name=name),
-        "Makefile": MAKEFILE.format(name=name),
-        "run-qemu.sh": RUN_QEMU.format(name=name),
-        "README.md": README.format(name=name),
+        "main.c": MAIN_C.format(name=app_name),
+        "Makefile": MAKEFILE.format(name=app_name),
+        "run-qemu.sh": RUN_QEMU.format(name=app_name),
+        "README.md": README.format(name=app_name),
     }
     for fname, content in files.items():
         with open(os.path.join(target, fname), "w") as fh:
